@@ -8,7 +8,6 @@ import { parse } from '../util'
 import { isChrome, initEnv } from './env'
 import SharedData, { init as initSharedData, destroy as destroySharedData } from 'src/shared-data'
 import storage from './storage'
-import { snapshotsCache } from './views/vuex/cache'
 import VuexResolve from './views/vuex/resolve'
 
 for (const key in filters) {
@@ -144,8 +143,7 @@ function initApp (shell) {
     })
 
     bridge.on('vuex:inspected-state', ({ index, snapshot }) => {
-      snapshotsCache.set(index, snapshot)
-      store.commit('vuex/RECEIVE_STATE', snapshot)
+      store.commit('vuex/RECEIVE_STATE', { index, snapshot })
 
       if (index === -1) {
         store.commit('vuex/UPDATE_BASE_STATE', snapshot)
@@ -167,6 +165,27 @@ function initApp (shell) {
       if (router.currentRoute.name !== 'events') {
         store.commit('events/INCREASE_NEW_EVENT_COUNT')
       }
+    })
+
+    bridge.on('router:init', payload => {
+      store.commit('router/INIT', parse(payload))
+    })
+
+    bridge.on('router:changed', payload => {
+      store.commit('router/CHANGED', parse(payload))
+    })
+
+    bridge.on('routes:init', payload => {
+      store.commit('routes/INIT', parse(payload))
+    })
+
+    bridge.on('routes:changed', payload => {
+      store.commit('routes/CHANGED', parse(payload))
+    })
+
+    // register filters
+    Vue.filter('formatTime', function (timestamp) {
+      return (new Date(timestamp)).toString().match(/\d\d:\d\d:\d\d/)[0]
     })
 
     bridge.on('events:reset', () => {

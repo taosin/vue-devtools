@@ -269,6 +269,36 @@ export function getCustomFunctionDetails (func) {
   }
 }
 
+export function getCustomRefDetails (instance, key, ref) {
+  let value
+  if (Array.isArray(ref)) {
+    value = ref.map((r) => getCustomRefDetails(instance, key, r)).map(data => data.value)
+  } else {
+    let name
+    if (ref._isVue) {
+      name = getComponentName(ref.$options)
+    } else {
+      name = ref.tagName.toLowerCase()
+    }
+
+    value = {
+      _custom: {
+        display: `&lt;${name}` +
+          (ref.id ? ` <span class="attr-title">id</span>="${ref.id}"` : '') +
+          (ref.className ? ` <span class="attr-title">class</span>="${ref.className}"` : '') + '&gt;',
+        uid: instance.__VUE_DEVTOOLS_UID__,
+        type: 'reference'
+      }
+    }
+  }
+  return {
+    type: '$refs',
+    key: key,
+    value,
+    editable: false
+  }
+}
+
 export function parse (data, revive) {
   return revive
     ? CircularJSON.parse(data, reviver)
@@ -518,8 +548,9 @@ export function openInEditor (file) {
       console.log('File ${fileName} opened in editor')
     } else {
       const msg = 'Opening component ${fileName} failed'
-      if (__VUE_DEVTOOLS_TOAST__) {
-        __VUE_DEVTOOLS_TOAST__(msg, 'error')
+      const target = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : {}
+      if (target.__VUE_DEVTOOLS_TOAST__) {
+        target.__VUE_DEVTOOLS_TOAST__(msg, 'error')
       } else {
         console.log('%c' + msg, 'color:red')
       }
@@ -550,6 +581,7 @@ function escapeChar (a) {
 }
 
 export function copyToClipboard (state) {
+  if (typeof document === 'undefined') return
   const dummyTextArea = document.createElement('textarea')
   dummyTextArea.textContent = stringify(state)
   document.body.appendChild(dummyTextArea)

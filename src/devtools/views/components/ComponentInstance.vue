@@ -1,7 +1,7 @@
 <template>
   <div
     :class="{
-      inactive: instance.inactive,
+      inactive: instance.inactive && !instance.parent.inactive,
       selected
     }"
     class="instance"
@@ -67,16 +67,16 @@
         fragment
       </span>
       <span
-        v-if="instance.inactive"
-        class="info inactive"
-      >
-        inactive
-      </span>
-      <span
         v-if="instance.functional"
         class="info functional"
       >
         functional
+      </span>
+      <span
+        v-if="instance.inactive"
+        class="info inactive"
+      >
+        inactive
       </span>
 
       <span class="spacer" />
@@ -302,7 +302,7 @@ export default {
     transform rotate(90deg)
 
 .angle-bracket
-  color $darkerGrey
+  color $darkGrey
 
 .item-name
   color $component-color

@@ -2,13 +2,16 @@ import Vue from 'vue'
 import store from './store'
 import Target from './Target.vue'
 import Other from './Other.vue'
+import Init from './Init.vue'
 import Counter from './Counter.vue'
+import RefTester from './RefTester.vue'
 import VuexObject from './VuexObject.vue'
 import NativeTypes from './NativeTypes.vue'
 import Events from './Events.vue'
 import MyClass from './MyClass.js'
-import Router from './Router.vue'
 import router from './router'
+import TransitionExample from './TransitionExample.vue'
+import Router from './router/Router.vue'
 
 window.VUE_DEVTOOLS_CONFIG = {
   openInEditorHost: '/'
@@ -25,6 +28,12 @@ circular.self = circular
 new Vue({
   store,
   router,
+  data: {
+    obj: {
+      items: items,
+      circular
+    }
+  },
   render (h) {
     return h('div', null, [
       h(Counter),
@@ -33,14 +42,11 @@ new Vue({
       h(Events, { key: 'foo' }),
       h(NativeTypes, { key: new Date() }),
       h(Router, { key: [] }),
-      h(VuexObject)
+      h(TransitionExample),
+      h(VuexObject),
+      h(Init),
+      h(RefTester)
     ])
-  },
-  data: {
-    obj: {
-      items: items,
-      circular
-    }
   }
 }).$mount('#app')
 

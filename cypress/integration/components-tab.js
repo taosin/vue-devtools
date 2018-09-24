@@ -1,16 +1,16 @@
 import { suite } from '../utils/suite'
 
-const baseInstanceCount = 9
+const baseInstanceCount = 12
 
 suite('components tab', () => {
+  beforeEach(() => cy.reload())
+
   it('should detect instances inside shadow DOM', () => {
     cy.get('.tree > .instance:last-child').contains('Shadow')
   })
 
   it('should select instance', () => {
-    cy.get('.instance .self').eq(0).click().then(el => {
-      expect(el).to.have.class('selected')
-    })
+    cy.get('.instance .self').eq(0).click().should('have.class', 'selected')
     cy.get('.tree').should('be.visible')
     cy.get('.action-header .title').contains('Root')
     cy.get('.data-field').contains('$route')
@@ -18,6 +18,26 @@ suite('components tab', () => {
 
   it('should expand root by default', () => {
     cy.get('.instance').should('have.length', baseInstanceCount)
+  })
+
+  it('should detect functional components', () => {
+    cy.get('.tree > .instance .instance:nth-child(2)').within(() => {
+      cy.get('.arrow').click().then(() => {
+        cy.get('.instance:last-child').contains('Functional')
+      })
+    })
+  })
+
+  it('should detect components in transition', () => {
+    cy.get('.tree > .instance .instance:nth-child(7)').within(() => {
+      cy.get('.arrow').click().then(() => {
+        cy.get('.instance').eq(1).within(() => {
+          cy.get('.arrow').click().then(() => {
+            cy.get('.instance').contains('TestComponent')
+          })
+        })
+      })
+    })
   })
 
   it('should select child instance', () => {
@@ -46,25 +66,27 @@ suite('components tab', () => {
 
   it('should expand child instance', () => {
     cy.get('.instance .instance:nth-child(2) .arrow-wrapper').click()
-    cy.get('.instance').should('have.length', baseInstanceCount + 7)
+    cy.get('.instance').should('have.length', baseInstanceCount + 10)
   })
 
   it('should add/remove component from app side', () => {
+    cy.get('.instance .instance:nth-child(2) .arrow-wrapper').click()
+    cy.get('.instance').should('have.length', baseInstanceCount + 10)
     cy.get('#target').iframe().then(({ get }) => {
       get('.add').click({ force: true })
     })
-    cy.get('.instance').should('have.length', baseInstanceCount + 10)
+    cy.get('.instance').should('have.length', baseInstanceCount + 13)
     cy.get('#target').iframe().then(({ get }) => {
       get('.remove').click({ force: true })
     })
-    cy.get('.instance').should('have.length', baseInstanceCount + 9)
+    cy.get('.instance').should('have.length', baseInstanceCount + 12)
   })
 
   it('should filter components', () => {
     cy.get('.left .search input').clear().type('counter')
     cy.get('.instance').should('have.length', 1)
     cy.get('.left .search input').clear().type('target')
-    cy.get('.instance').should('have.length', 10)
+    cy.get('.instance').should('have.length', 12)
     cy.get('.left .search input').clear()
   })
 
@@ -82,6 +104,7 @@ suite('components tab', () => {
   })
 
   it('should display render key', () => {
+    cy.get('.instance .instance:nth-child(2) .arrow-wrapper').click()
     cy.get('.instance .self .attr-title').contains('key')
     cy.get('.instance .self .attr-value').contains('1')
   })
@@ -96,5 +119,14 @@ suite('components tab', () => {
       expect(el.text()).to.contain('noop:ƒ noop(a, b, c)')
     })
     cy.get('.left .search input').clear()
+  })
+
+  it('should display $refs', () => {
+    cy.get('.instance .item-name').contains('RefTester').click()
+    cy.get('.right .data-wrapper').then(el => {
+      expect(el.text()).to.contain('list:Array[4]')
+      expect(el.text()).to.contain('<li>')
+      expect(el.text()).to.contain('tester:<p id="testing"')
+    })
   })
 })

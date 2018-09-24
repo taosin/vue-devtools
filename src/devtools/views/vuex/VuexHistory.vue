@@ -69,7 +69,7 @@
           <span class="entry-actions">
             <a
               v-tooltip="'Time Travel to This State'"
-              class="action"
+              class="action action-time-travel"
               @click.stop="timeTravelTo(null)"
             >
               <VueIcon
@@ -103,8 +103,8 @@
           <span class="entry-actions">
             <a
               v-tooltip="'Commit This Mutation'"
-              class="action"
-              @click.stop="commit(entry)"
+              class="action action-commit"
+              @click="commit(entry);$event.stopImmediatePropagation()"
             >
               <VueIcon
                 class="medium"
@@ -114,8 +114,8 @@
             </a>
             <a
               v-tooltip="'Revert This Mutation'"
-              class="action"
-              @click.stop="revert(entry)"
+              class="action action-revert"
+              @click="revert(entry);$event.stopImmediatePropagation()"
             >
               <VueIcon
                 class="small"
@@ -126,8 +126,8 @@
             <a
               v-if="!isActive(index, entry)"
               v-tooltip="'Time Travel to This State'"
-              class="action"
-              @click.stop="timeTravelTo(entry)"
+              class="action action-time-travel"
+              @click="timeTravelTo(entry)"
             >
               <VueIcon
                 class="medium"
@@ -326,8 +326,6 @@ $inspected_color = #af90d5
     .entry-actions
       display inline-block
   .vue-ui-dark-mode &
-    .mutation-type
-      color #e36eec
     &.active
       .mutation-type
         color #fff

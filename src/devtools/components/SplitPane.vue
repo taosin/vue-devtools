@@ -123,6 +123,7 @@ export default {
 .left,
 .right
   position relative
+  height 100%
 
 .horizontal
   .bottom
@@ -154,5 +155,4 @@ export default {
     bottom -5px
     height 10px
     cursor ns-resize
-
 </style>
